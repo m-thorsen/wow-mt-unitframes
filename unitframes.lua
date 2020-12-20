@@ -1,4 +1,4 @@
-local MTUI = LibStub("AceAddon-3.0"):GetAddon("MTUI");
+local MTUnitFrames = LibStub("AceAddon-3.0"):GetAddon("MTUnitFrames");
 
 local function ApplyCommonFrameTweaks(frame)
     frame.name:ClearAllPoints();
@@ -9,15 +9,35 @@ local function ApplyCommonFrameTweaks(frame)
     frame.healthbar.TextString:SetPoint("CENTER", frame.healthbar, "CENTER", 0, 0);
 end;
 
-local function SetHealthbarColor(bar)
-    if UnitExists(bar.unit) then
-        bar:SetStatusBarColor(MTUI:GetUnitColor(bar.unit));
+-- Return an appropriate unit color based on class (or threat situation)
+local function GetUnitColor(unit, useThreatColors)
+    if (UnitIsTapDenied(unit) or not UnitIsConnected(unit)) then
+        return GRAY_FONT_COLOR:GetRGB();
+    elseif (UnitIsPlayer(unit) and UnitClass(unit)) then
+        local _, class = UnitClass(unit);
+        local c = RAID_CLASS_COLORS[class];
+        return c.r, c.g, c.b;
+    elseif (UnitReaction(unit, "player") and UnitReaction(unit, "player") > 4) then
+        return GREEN_FONT_COLOR:GetRGB();
+    elseif (useThreatColors) then
+        threatLevel = UnitThreatSituation("player", unit);
+        if (threatLevel == 3) then return RED_FONT_COLOR:GetRGB();
+        elseif (threatLevel == 2) then return ORANGE_FONT_COLOR:GetRGB();
+        elseif (threatLevel == 1) then return YELLOW_FONT_COLOR:GetRGB();
+        elseif (threatLevel ~= nil) then return GREEN_FONT_COLOR:GetRGB();
+        end;
     end;
+    return UnitSelectionColor(unit, true);
+end;
+
+local function SetHealthbarColor(bar)
+    if not UnitExists(bar.unit) then end;
+    bar:SetStatusBarColor(GetUnitColor(bar.unit));
 end;
 
 local function TweakPlayerFrame(frame)
-    PlayerFrameTexture:SetTexture("Interface/Addons/MTUI/Media/TargetFrame");
-    PlayerStatusTexture:SetTexture("Interface/Addons/MTUI/Media/Player-Status");
+    PlayerFrameTexture:SetTexture("Interface/Addons/MTUnitFrames/Media/TargetFrame");
+    PlayerStatusTexture:SetTexture("Interface/Addons/MTUnitFrames/Media/Player-Status");
     PlayerStatusTexture:SetWidth(192);
     ApplyCommonFrameTweaks(frame);
     frame.healthbar:SetPoint("TOPRIGHT", -5, -24);
@@ -54,7 +74,7 @@ local function TweakTargetFrame(frame)
     frame.nameBackground:Hide();
     if (not frame.texture) then
         local tex = frame:CreateTexture(nil, "BACKGROUND");
-        tex:SetTexture("Interface/Addons/MTUI/Media/Frames/TargetingFrameShadow");
+        tex:SetTexture("Interface/Addons/MTUnitFrames/Media/TargetingFrameShadow");
         tex:SetPoint("TOPLEFT", frame, "TOPLEFT", -25, 16);
         tex:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 20, 0);
         frame.texture = tex;
@@ -84,13 +104,13 @@ local function TweakTargetFrame(frame)
         frame.healthbar:SetPoint("TOPLEFT", 5, -24);
         frame.Background:SetHeight(40);
         if (type == "worldboss" or type == "elite") then
-            frame.borderTexture:SetTexture("Interface/Addons/MTUI/Media/TargetFrame-Elite");
+            frame.borderTexture:SetTexture("Interface/Addons/MTUnitFrames/Media/TargetFrame-Elite");
         elseif (type == "rareelite") then
-            frame.borderTexture:SetTexture("Interface/Addons/MTUI/Media/TargetFrame-RareElite");
+            frame.borderTexture:SetTexture("Interface/Addons/MTUnitFrames/Media/TargetFrame-RareElite");
         elseif (type == "rare") then
-            frame.borderTexture:SetTexture("Interface/Addons/MTUI/Media/TargetFrame-Rare");
+            frame.borderTexture:SetTexture("Interface/Addons/MTUnitFrames/Media/TargetFrame-Rare");
         else
-            frame.borderTexture:SetTexture("Interface/Addons/MTUI/Media/TargetFrame");
+            frame.borderTexture:SetTexture("Interface/Addons/MTUnitFrames/Media/TargetFrame");
         end;
         if (frame.threatIndicator) then
             frame.threatIndicator:SetTexCoord(0, 0.9453125, 0, 0.181640625);
@@ -101,7 +121,7 @@ local function TweakTargetFrame(frame)
     end;
 end;
 
-function MTUI:InitUnitframes()
+function MTUnitFrames:InitUnitframes()
     hooksecurefunc("PlayerFrame_ToPlayerArt", TweakPlayerFrame);
     hooksecurefunc("PlayerFrame_ToVehicleArt", TweakVehicleFrame);
     hooksecurefunc("TargetFrame_CheckClassification", TweakTargetFrame);

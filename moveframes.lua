@@ -1,4 +1,4 @@
-local MTUI = LibStub("AceAddon-3.0"):GetAddon("MTUI");
+local MTUnitFrames = LibStub("AceAddon-3.0"):GetAddon("MTUnitFrames");
 
 local function moveFrame(frame, frameAnchor, parent, parentAnchor, deltaX, deltaY)
     frame:SetMovable(true);
@@ -8,9 +8,9 @@ local function moveFrame(frame, frameAnchor, parent, parentAnchor, deltaX, delta
     frame:SetMovable(false);
 end;
 
-function MTUI:InitMoveFrames()
-    local Y = self.db.global.unitframeOffsetY;
-    local X = self.db.global.unitframeOffsetX / 2;
+function MTUnitFrames:InitMoveFrames()
+    local Y = self.db.global.offsetY;
+    local X = self.db.global.offsetX / 2;
 
     moveFrame(PlayerFrame, "BOTTOMRIGHT", UIParent, "BOTTOM", -X, Y);
     moveFrame(TargetFrame, "BOTTOMLEFT", UIParent, "BOTTOM", X, Y);
@@ -27,6 +27,4 @@ function MTUI:InitMoveFrames()
 
     local TorghastBuffs = ScenarioBlocksFrame.MawBuffsBlock.Container;
     moveFrame(TorghastBuffs.List, "TOPLEFT", TorghastBuffs, "TOPRIGHT", 0, 0);
-
-    -- TorghastBuffs:GetPushedTexture():SetTexCoord(1, 0, 0, 1)
 end;
