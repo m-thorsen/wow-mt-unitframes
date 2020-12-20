@@ -9,8 +9,6 @@
 embeds.xml
 
 setup.lua
-common.lua
-options.lua
 unitframes.lua
 moveframes.lua
 statusbars.lua
